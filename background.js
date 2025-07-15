@@ -1,0 +1,1 @@
+// background.js (vacío por ahora)

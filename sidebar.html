@@ -1,0 +1,80 @@
+<!-- sidebar.html – formulario Caleads -->
+<style>
+  #caleads-sidebar{
+    font-family:'Inter',sans-serif;
+    width:340px;height:100vh;background:#fff;
+    box-shadow:-4px 0 16px rgba(0,0,0,.12);
+    display:flex;flex-direction:column;
+    padding:18px 18px;overflow-y:auto;
+  }
+  #caleads-sidebar h2{font-size:22px;font-weight:600;margin:6px 0 20px}
+  #caleads-sidebar .logo{width:120px;margin-bottom:10px}
+  #caleads-sidebar input{
+    width:100%;padding:10px;margin-bottom:10px;background:#fff;
+    border:1px solid #d0d7de;border-radius:8px;font-size:13px;
+  }
+  #caleads-sidebar input:focus{
+    border-color:#007bff;outline:none;
+    box-shadow:0 0 0 2px rgba(0,123,255,.25);
+  }
+  #caleads-sidebar button{
+    width:100%;padding:10px;background:#007bff;color:#fff;
+    font-size:14px;font-weight:600;border:none;border-radius:8px;
+    cursor:pointer;
+  }
+  #caleads-sidebar button:hover{background:#0064d2}
+</style>
+
+<img class="logo" id="caleadsLogo" alt="Caleads">
+<h2>Save Lead</h2>
+
+<form id="leadForm">
+  <input id="name"       placeholder="Full Name">
+  <input id="city"       placeholder="City">
+  <input id="country"    placeholder="Country">
+  <input id="linkedin"   placeholder="LinkedIn URL">
+  <input id="website"    placeholder="Website">
+  <input id="phone"      placeholder="Phone">
+  <input id="email"      placeholder="Email">
+  <input id="maintech"   placeholder="Main Technology">
+  <input id="frameworks" placeholder="Frameworks">
+  <input id="experience" placeholder="Total Years Experience">
+  <button type="submit">Save to Sheet</button>
+</form>
+
+<script>
+  /* Logo */
+  document.getElementById('caleadsLogo').src = chrome.runtime.getURL('icon.png');
+
+  /* Evitar que LinkedIn capture Ctrl+V */
+  document.querySelectorAll('#caleads-sidebar input')
+          .forEach(i=>i.addEventListener('keydown',e=>e.stopPropagation()));
+
+  /* Toast minimal */
+  function toast(msg){
+    const t=document.createElement('div');
+    t.textContent=msg;
+    Object.assign(t.style,{
+      position:'fixed',bottom:'24px',right:'24px',background:'#007bff',color:'#fff',
+      padding:'10px 16px',borderRadius:'6px',fontSize:'14px',zIndex:'2147483647',
+      boxShadow:'0 2px 8px rgba(0,0,0,.25)'
+    });
+    document.body.append(t); setTimeout(()=>t.remove(),2500);
+  }
+
+  const SHEET_URL='https://script.google.com/macros/s/AKfycbxh_3ULEHiXisqeC3wxbLAzntw-KEJsXelxsAS8UHmAH2yKPl_4I0_JW3Xyhc2jI680HA/exec';
+
+  document.getElementById('leadForm').addEventListener('submit',e=>{
+    e.preventDefault();
+    const data=Object.fromEntries(new FormData(e.target).entries());
+
+    fetch(SHEET_URL,{
+      method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    });
+
+    toast('✔ Guardado');
+    e.target.reset();
+  });
+</script>
