@@ -10,9 +10,9 @@
 
   /* ---------- inputs ---------- */
   #caleads-sidebar input{
-    width:100%;padding:12px 14px;margin-bottom:14px;
-    border:1px solid #d0d7de;border-radius:8px;background:#fff;
-    font-size:14px;transition:border-color .15s ease;
+    width:100%;padding:6px 14px;margin-bottom:10px;
+    border:0px solid #d0d7de;border-radius:8px;background:#fff;
+    font-size:13px;transition:border-color .15s ease;
   }
   #caleads-sidebar input:focus{
     outline:none;border-color:#007bff;
@@ -32,7 +32,7 @@
 <img class="logo" id="caleadsLogo" alt="Caleads Logo">
 <h2>Save Leads</h2>
 
-<form id="leadForm">
+<form id="leadForm" onsubmit="return false;">
   <input id="name"       placeholder="Full Name">
   <input id="city"       placeholder="City">
   <input id="country"    placeholder="Country">
@@ -47,14 +47,10 @@
 </form>
 
 <script>
-  /*  Logo correcto  */
   document.getElementById('caleadsLogo').src = chrome.runtime.getURL('icon.png');
-
-  /*  Evitar que LinkedIn capture Ctrl+V  */
   document.querySelectorAll('#caleads-sidebar input')
           .forEach(i => i.addEventListener('keydown', e => e.stopPropagation()));
 
-  /* ---------- Config ---------- */
   const SHEET_URL =
     'https://script.google.com/macros/s/AKfycbxh_3ULEHiXisqeC3wxbLAzntw-KEJsXelxsAS8UHmAH2yKPl_4I0_JW3Xyhc2jI680HA/exec';
 
@@ -63,30 +59,37 @@
   const okColor   = '#28a745';
   const baseColor = '#007bff';
 
-  form.addEventListener('submit', e => {
-    e.preventDefault();                       // no recarga
-    const data = Object.fromEntries(new FormData(form).entries());
+  btn.addEventListener('click', async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(form).entries());
+  
+  btn.disabled = true;
+  const txtOrig = btn.textContent;
 
-    // petición sin esperar respuesta
-    fetch(SHEET_URL,{
-      method :'POST',
-      headers:{'Content-Type':'application/json'},
-      body   :JSON.stringify(data),
-      mode   :'no-cors'
-    }).catch(()=>{});
+  try {
+    const res = await fetch(SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
 
-    // feedback
-    btn.disabled = true;
-    const txtOrig = btn.textContent;
-    btn.textContent = 'Candidate saved';
-    btn.style.background = okColor;
+    if (res.ok) {
+      btn.textContent = 'Candidate saved';
+      btn.style.background = okColor;
+      form.reset();
+    } else {
+      btn.textContent = 'Error';
+      btn.style.background = '#dc3545';
+    }
+  } catch {
+    btn.textContent = 'Error';
+    btn.style.background = '#dc3545';
+  }
 
-    setTimeout(()=>{
-      btn.disabled = false;
-      btn.textContent = txtOrig;
-      btn.style.background = baseColor;
-    },2000);
-
-    form.reset();
-  });
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = txtOrig;
+    btn.style.background = baseColor;
+  }, 2000);
+});
 </script>
