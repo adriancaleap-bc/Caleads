@@ -1,106 +1,51 @@
-// content.js – barra lateral Caleads (versión sin alert)
+// content.js – inyecta panel y pasa datos al service‑worker
 (function () {
   if (document.getElementById('caleads-sidebar')) return;
 
-  /* ---------- Botón vertical ---------- */
+  /* -------- botón -------- */
   const tab = document.createElement('div');
   Object.assign(tab.style, {
-    position:'fixed', right:'0', top:'35%',
-    writingMode:'vertical-rl', background:'#007bff', color:'#fff',
-    padding:'10px 8px', cursor:'pointer', fontSize:'14px',
-    borderTopLeftRadius:'6px', borderBottomLeftRadius:'6px',
-    zIndex:'2147483647'
+    position: 'fixed', right: 0, top: '35%',
+    writingMode: 'vertical-rl', background: '#007bff', color: '#fff',
+    padding: '10px 8px', cursor: 'pointer', fontSize: '14px',
+    borderTopLeftRadius: '6px', borderBottomLeftRadius: '6px',
+    zIndex: 2147483647
   });
   tab.textContent = 'Caleads';
 
-  /* ---------- Contenedor vacío ---------- */
-  const panel = document.createElement('div');
-  panel.id = 'caleads-sidebar';
-  Object.assign(panel.style, {
-    position:'fixed', top:'0', right:'0',
-    width:'360px', height:'100vh', display:'none',
-    zIndex:'2147483646'
+  /* -------- panel (HTML externo) -------- */
+  const iframe = document.createElement('iframe');
+  iframe.id = 'caleads-sidebar';
+  iframe.src = chrome.runtime.getURL('sidebar.html');
+  Object.assign(iframe.style, {
+    position: 'fixed', top: 0, right: 0, width: '360px', height: '100vh',
+    border: 'none', display: 'none', zIndex: 2147483646
   });
 
-  /* ---------- Cargar HTML ---------- */
-  fetch(chrome.runtime.getURL('sidebar.html'))
-    .then(r => r.text())
-    .then(html => {
-      panel.innerHTML = html;
-      initSidebar();
-      document.body.append(tab, panel);
-    });
+  document.body.append(tab, iframe);
+  tab.onclick = () => iframe.style.display =
+    iframe.style.display === 'none' ? 'block' : 'none';
 
-  /* Abrir / cerrar */
-  tab.addEventListener('click',
-    () => panel.style.display = panel.style.display === 'none' ? 'block' : 'none');
-
-  /* Drag del botón vertical */
+  /* arrastrar el tab */
   let drag = false, off = 0;
-  tab.addEventListener('mousedown', e => { drag = true; off = e.clientY - tab.getBoundingClientRect().top; e.preventDefault();});
-  document.addEventListener('mousemove', e => {
-    if (!drag) return;
-    tab.style.top = Math.max(0, Math.min(window.innerHeight - 100, e.clientY - off)) + 'px';
-  });
-  document.addEventListener('mouseup', () => drag = false);
+  tab.onmousedown = e => { drag = true; off = e.clientY - tab.getBoundingClientRect().top; e.preventDefault(); };
+  document.onmousemove = e => drag && (tab.style.top =
+    Math.max(0, Math.min(window.innerHeight - 100, e.clientY - off)) + 'px');
+  document.onmouseup = () => drag = false;
 
-  /* ---------- Inicialización ---------- */
-  function initSidebar () {
+  // Escuchar mensajes desde el iframe
+  window.addEventListener('message', (event) => {
+    if (event.origin !== chrome.runtime.getURL('').slice(0, -1)) return; // Validar origen
 
-    /*  Logo correcto  */
-    panel.querySelector('#caleadsLogo').src = chrome.runtime.getURL('icon.png');
-
-    /*  Evitar que LinkedIn capture Ctrl+V  */
-    panel.querySelectorAll('input')
-         .forEach(i => i.addEventListener('keydown', e => e.stopPropagation()));
-
-    /*  Config Sheets  */
-    const SHEET_URL =
-      'https://script.google.com/macros/s/AKfycbxWepNkArQ_1jUx5eXnqTT6_-mShA_w3cSn_OFXZIG4Tm2MBajF1P2izBazdrY5dzGy9g/exec'; // Reemplaza con la nueva URL
-
-    const form = panel.querySelector('#leadForm');
-    const btn  = form.querySelector('button[type="submit"]');
-    const okColor   = '#28a745', baseColor = '#007bff';
-
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(form).entries());
-
-      console.log('Datos enviados:', data); // Registrar los datos enviados
-
-      try {
-        const response = await fetch(SHEET_URL, {
-          method :'POST',
-          headers:{ 'Content-Type':'application/json' },
-          body   : JSON.stringify(data),
-          mode   :'cors'
-        });
-
-        console.log('Estado de la respuesta:', response.status); // Registrar el estado de la respuesta
-
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+    const { type, data } = event.data;
+    if (type === 'saveLead') {
+      chrome.runtime.sendMessage({ type: 'saveLead', data }, (response) => {
+        if (response.success) {
+          console.log('Lead guardado correctamente:', response.message);
+        } else {
+          console.error('Error al guardar el lead:', response.message);
         }
-
-        const result = await response.json();
-        console.log('Respuesta del servidor:', result);
-
-        /* feedback verde */
-        btn.disabled = true;
-        const txt = btn.textContent;
-        btn.textContent      = 'Candidate saved';
-        btn.style.background = okColor;
-        setTimeout(() => {
-          btn.disabled         = false;
-          btn.textContent      = txt;
-          btn.style.background = baseColor;
-        }, 2000);
-
-        form.reset();
-      } catch (error) {
-        console.error('Error al enviar datos:', error);
-        alert(`Error al guardar el candidato: ${error.message}. Revisa la consola para más detalles.`);
-      }
-    });
-  }
+      });
+    }
+  });
 })();

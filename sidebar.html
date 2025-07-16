@@ -1,95 +1,68 @@
-<style>
-  /* ---------- contenedor ---------- */
-  #caleads-sidebar{
-    font-family:'Inter',sans-serif;width:340px;height:100vh;
-    background:#fff;box-shadow:-4px 0 16px rgba(0,0,0,.12);
-    display:flex;flex-direction:column;padding:24px 22px;overflow-y:auto;
-  }
-  #caleads-sidebar h2{font-size:22px;font-weight:600;margin:8px 0 24px}
-  #caleads-sidebar .logo{width:120px;margin-bottom:12px;object-fit:contain}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 
-  /* ---------- inputs ---------- */
-  #caleads-sidebar input{
-    width:100%;padding:6px 14px;margin-bottom:10px;
-    border:0px solid #d0d7de;border-radius:8px;background:#fff;
-    font-size:13px;transition:border-color .15s ease;
-  }
-  #caleads-sidebar input:focus{
-    outline:none;border-color:#007bff;
-    box-shadow:0 0 0 2px rgba(0,123,255,.25);
-  }
-  #caleads-sidebar input::placeholder{color:#8a94a6}
-
-  /* ---------- botón ---------- */
-  #caleads-sidebar button{
-    width:100%;padding:12px;background:#007bff;color:#fff;
-    font-size:15px;font-weight:600;border:none;border-radius:8px;
-    cursor:pointer;transition:background .2s ease;
-  }
-  #caleads-sidebar button:hover{background:#0064d2}
-</style>
-
-<img class="logo" id="caleadsLogo" alt="Caleads Logo">
-<h2>Save Leads</h2>
-
-<form id="leadForm" onsubmit="return false;">
-  <input id="name"       placeholder="Full Name">
-  <input id="city"       placeholder="City">
-  <input id="country"    placeholder="Country">
-  <input id="linkedin"   placeholder="LinkedIn URL">
-  <input id="website"    placeholder="Website">
-  <input id="phone"      placeholder="Phone">
-  <input id="email"      placeholder="Email">
-  <input id="maintech"   placeholder="Main Technology">
-  <input id="frameworks" placeholder="Frameworks">
-  <input id="experience" placeholder="Total Years Experience">
-  <button type="submit">Save candidate</button>
-</form>
-
-<script>
-  document.getElementById('caleadsLogo').src = chrome.runtime.getURL('icon.png');
-  document.querySelectorAll('#caleads-sidebar input')
-          .forEach(i => i.addEventListener('keydown', e => e.stopPropagation()));
-
-  const SHEET_URL =
-    'https://script.google.com/macros/s/AKfycbxWepNkArQ_1jUx5eXnqTT6_-mShA_w3cSn_OFXZIG4Tm2MBajF1P2izBazdrY5dzGy9g/exec'; // Nueva URL
-
-  const form      = document.getElementById('leadForm');
-  const btn       = form.querySelector('button[type="submit"]');
-  const okColor   = '#28a745';
-  const baseColor = '#007bff';
-
-  btn.addEventListener('click', async e => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(form).entries());
-    
-    btn.disabled = true;
-    const txtOrig = btn.textContent;
-
-    try {
-      const res = await fetch(SHEET_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-
-      if (res.ok) {
-        btn.textContent = 'Candidate saved';
-        btn.style.background = okColor;
-        form.reset();
-      } else {
-        btn.textContent = 'Error';
-        btn.style.background = '#dc3545';
-      }
-    } catch {
-      btn.textContent = 'Error';
-      btn.style.background = '#dc3545';
+  <style>
+    /* ------ contenedor ------ */
+    #caleads-sidebar{
+      font-family:'Inter',sans-serif;
+      width:340px;height:100vh;background:#fff;
+      box-shadow:-4px 0 16px rgba(0,0,0,.12);
+      display:flex;flex-direction:column;
+      padding:24px 22px;overflow-y:auto;
     }
+    #caleads-sidebar h2 {font-size:22px;font-weight:600;margin:8px 0 24px;}
+    #caleadsLogo       {width:120px;margin-bottom:12px;object-fit:contain;}
 
-    setTimeout(() => {
-      btn.disabled = false;
-      btn.textContent = txtOrig;
-      btn.style.background = baseColor;
-    }, 2000);
-  });
-</script>
+    /* ------ campos ------ */
+    #caleads-sidebar input{
+      width:100%;padding:8px 14px;margin-bottom:10px;
+      border:1px solid #d0d7de;border-radius:8px;background:#fff;font-size:13px;
+      transition:border-color .15s ease;
+    }
+    #caleads-sidebar input:focus{
+      outline:none;border-color:#007bff;
+      box-shadow:0 0 0 2px rgba(0,123,255,.25);
+    }
+    #caleads-sidebar input::placeholder{color:#8a94a6;}
+
+    /* ------ botón ------ */
+    #caleads-sidebar button{
+      width:100%;padding:12px;font-size:15px;font-weight:600;
+      color:#fff;background:#007bff;border:none;border-radius:8px;cursor:pointer;
+      transition:background .2s;
+    }
+    #caleads-sidebar button:hover{background:#0064d2;}
+
+    /* feedback colores */
+    button.ok    {background:#28a745 !important;}
+    button.error {background:#dc3545 !important;}
+  </style>
+</head>
+
+<body>
+  <div id="caleads-sidebar">
+    <img  id="caleadsLogo" alt="Caleads Logo" />
+    <h2>Save Leads</h2>
+
+    <form id="leadForm">
+      <input id="name"       placeholder="Full Name"            />
+      <input id="city"       placeholder="City"                 />
+      <input id="country"    placeholder="Country"              />
+      <input id="linkedin"   placeholder="LinkedIn URL"         />
+      <input id="website"    placeholder="Website"              />
+      <input id="phone"      placeholder="Phone"                />
+      <input id="email"      placeholder="Email"                />
+      <input id="maintech"   placeholder="Main Technology"      />
+      <input id="frameworks" placeholder="Frameworks"           />
+      <input id="experience" placeholder="Total Years Experience"/>
+      <button type="submit">Save candidate</button>
+    </form>
+  </div>
+
+  <!-- nada de <script> inline – todo está en sidebar.js -->
+  <script src="sidebar.js"></script>
+</body>
+</html>
