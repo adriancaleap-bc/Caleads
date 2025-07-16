@@ -1,35 +1,39 @@
-<!-- sidebar.html – formulario Caleads -->
 <style>
+  /* ---------- contenedor ---------- */
   #caleads-sidebar{
-    font-family:'Inter',sans-serif;
-    width:340px;height:100vh;background:#fff;
-    box-shadow:-4px 0 16px rgba(0,0,0,.12);
-    display:flex;flex-direction:column;
-    padding:10px 10px;overflow-y:auto;
+    font-family:'Inter',sans-serif;width:340px;height:100vh;
+    background:#fff;box-shadow:-4px 0 16px rgba(0,0,0,.12);
+    display:flex;flex-direction:column;padding:24px 22px;overflow-y:auto;
   }
-  #caleads-sidebar h2{font-size:22px;font-weight:600;margin:6px 0 20px}
-  #caleads-sidebar .logo{width:120px;margin-bottom:10px}
+  #caleads-sidebar h2{font-size:22px;font-weight:600;margin:8px 0 24px}
+  #caleads-sidebar .logo{width:120px;margin-bottom:12px;object-fit:contain}
+
+  /* ---------- inputs ---------- */
   #caleads-sidebar input{
-    width:100%;padding:10px;margin-bottom:10px;background:#fff;
-    border:1px solid #d0d7de;border-radius:8px;font-size:13px;
+    width:100%;padding:12px 14px;margin-bottom:14px;
+    border:1px solid #d0d7de;border-radius:8px;background:#fff;
+    font-size:14px;transition:border-color .15s ease;
   }
   #caleads-sidebar input:focus{
-    border-color:#007bff;outline:none;
+    outline:none;border-color:#007bff;
     box-shadow:0 0 0 2px rgba(0,123,255,.25);
   }
+  #caleads-sidebar input::placeholder{color:#8a94a6}
+
+  /* ---------- botón ---------- */
   #caleads-sidebar button{
-    width:100%;padding:10px;background:#007bff;color:#fff;
-    font-size:14px;font-weight:600;border:none;border-radius:8px;
-    cursor:pointer;
+    width:100%;padding:12px;background:#007bff;color:#fff;
+    font-size:15px;font-weight:600;border:none;border-radius:8px;
+    cursor:pointer;transition:background .2s ease;
   }
   #caleads-sidebar button:hover{background:#0064d2}
 </style>
 
-<img class="logo" id="caleadsLogo" alt="Caleads">
+<img class="logo" id="caleadsLogo" alt="Caleads Logo">
 <h2>Save Leads</h2>
 
 <form id="leadForm">
-  <input id="name"       placeholder="Full Name">
+  <input id="name"       placeholder="Full Name">
   <input id="city"       placeholder="City">
   <input id="country"    placeholder="Country">
   <input id="linkedin"   placeholder="LinkedIn URL">
@@ -39,42 +43,50 @@
   <input id="maintech"   placeholder="Main Technology">
   <input id="frameworks" placeholder="Frameworks">
   <input id="experience" placeholder="Total Years Experience">
-  <button type="submit">Save to Sheet</button>
+  <button type="submit">Save candidate</button>
 </form>
 
 <script>
-  /* Logo */
+  /*  Logo correcto  */
   document.getElementById('caleadsLogo').src = chrome.runtime.getURL('icon.png');
 
-  /* Evitar que LinkedIn capture Ctrl+V */
+  /*  Evitar que LinkedIn capture Ctrl+V  */
   document.querySelectorAll('#caleads-sidebar input')
-          .forEach(i=>i.addEventListener('keydown',e=>e.stopPropagation()));
+          .forEach(i => i.addEventListener('keydown', e => e.stopPropagation()));
 
-  /* Toast minimal */
-  function toast(msg){
-    const t=document.createElement('div');
-    t.textContent=msg;
-    Object.assign(t.style,{
-      position:'fixed',bottom:'24px',right:'24px',background:'#007bff',color:'#fff',
-      padding:'10px 16px',borderRadius:'6px',fontSize:'14px',zIndex:'2147483647',
-      boxShadow:'0 2px 8px rgba(0,0,0,.25)'
-    });
-    document.body.append(t); setTimeout(()=>t.remove(),2500);
-  }
+  /* ---------- Config ---------- */
+  const SHEET_URL =
+    'https://script.google.com/macros/s/AKfycbxh_3ULEHiXisqeC3wxbLAzntw-KEJsXelxsAS8UHmAH2yKPl_4I0_JW3Xyhc2jI680HA/exec';
 
-  const SHEET_URL='https://script.google.com/macros/s/AKfycbxh_3ULEHiXisqeC3wxbLAzntw-KEJsXelxsAS8UHmAH2yKPl_4I0_JW3Xyhc2jI680HA/exec';
+  const form      = document.getElementById('leadForm');
+  const btn       = form.querySelector('button[type="submit"]');
+  const okColor   = '#28a745';
+  const baseColor = '#007bff';
 
-  document.getElementById('leadForm').addEventListener('submit',e=>{
-    e.preventDefault();
-    const data=Object.fromEntries(new FormData(e.target).entries());
+  form.addEventListener('submit', e => {
+    e.preventDefault();                       // no recarga
+    const data = Object.fromEntries(new FormData(form).entries());
 
+    // petición sin esperar respuesta
     fetch(SHEET_URL,{
-      method:'POST',mode:'no-cors',
+      method :'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(data)
-    });
+      body   :JSON.stringify(data),
+      mode   :'no-cors'
+    }).catch(()=>{});
 
-    toast('✔ Guardado');
-    e.target.reset();
+    // feedback
+    btn.disabled = true;
+    const txtOrig = btn.textContent;
+    btn.textContent = 'Candidate saved';
+    btn.style.background = okColor;
+
+    setTimeout(()=>{
+      btn.disabled = false;
+      btn.textContent = txtOrig;
+      btn.style.background = baseColor;
+    },2000);
+
+    form.reset();
   });
 </script>
