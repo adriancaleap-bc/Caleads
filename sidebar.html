@@ -1,68 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
-
   <style>
-    /* ------ contenedor ------ */
     #caleads-sidebar{
-      font-family:'Inter',sans-serif;
-      width:340px;height:100vh;background:#fff;
-      box-shadow:-4px 0 16px rgba(0,0,0,.12);
-      display:flex;flex-direction:column;
-      padding:24px 22px;overflow-y:auto;
+      font-family:'Inter',sans-serif;width:340px;height:100vh;
+      background:#fff;box-shadow:-4px 0 16px rgba(0,0,0,.12);
+      display:flex;flex-direction:column;padding:24px 22px;overflow-y:auto;
     }
-    #caleads-sidebar h2 {font-size:22px;font-weight:600;margin:8px 0 24px;}
-    #caleadsLogo       {width:120px;margin-bottom:12px;object-fit:contain;}
-
-    /* ------ campos ------ */
+    #caleads-sidebar h2{font-size:22px;font-weight:600;margin:8px 0 24px}
+    #caleads-sidebar .logo{width:120px;margin-bottom:12px;object-fit:contain}
     #caleads-sidebar input{
-      width:100%;padding:8px 14px;margin-bottom:10px;
-      border:1px solid #d0d7de;border-radius:8px;background:#fff;font-size:13px;
-      transition:border-color .15s ease;
+      width:100%;padding:6px 14px;margin-bottom:10px;
+      border:1px solid #d0d7de;border-radius:8px;background:#fff;
+      font-size:13px;transition:border-color .15s ease;
     }
     #caleads-sidebar input:focus{
       outline:none;border-color:#007bff;
       box-shadow:0 0 0 2px rgba(0,123,255,.25);
     }
-    #caleads-sidebar input::placeholder{color:#8a94a6;}
-
-    /* ------ botón ------ */
+    #caleads-sidebar input::placeholder{color:#8a94a6}
     #caleads-sidebar button{
-      width:100%;padding:12px;font-size:15px;font-weight:600;
-      color:#fff;background:#007bff;border:none;border-radius:8px;cursor:pointer;
-      transition:background .2s;
+      width:100%;padding:12px;background:#007bff;color:#fff;
+      font-size:15px;font-weight:600;border:none;border-radius:8px;
+      cursor:pointer;transition:background .2s ease;
     }
-    #caleads-sidebar button:hover{background:#0064d2;}
-
-    /* feedback colores */
-    button.ok    {background:#28a745 !important;}
-    button.error {background:#dc3545 !important;}
+    #caleads-sidebar button:hover{background:#0064d2}
   </style>
 </head>
-
 <body>
   <div id="caleads-sidebar">
-    <img  id="caleadsLogo" alt="Caleads Logo" />
-    <h2>Save Leads</h2>
-
+    <h2>Save Lead</h2>
     <form id="leadForm">
-      <input id="name"       placeholder="Full Name"            />
-      <input id="city"       placeholder="City"                 />
-      <input id="country"    placeholder="Country"              />
-      <input id="linkedin"   placeholder="LinkedIn URL"         />
-      <input id="website"    placeholder="Website"              />
-      <input id="phone"      placeholder="Phone"                />
-      <input id="email"      placeholder="Email"                />
-      <input id="maintech"   placeholder="Main Technology"      />
-      <input id="frameworks" placeholder="Frameworks"           />
-      <input id="experience" placeholder="Total Years Experience"/>
+      <input name="name"       placeholder="Full Name" />
+      <input name="city"       placeholder="City" />
+      <input name="country"    placeholder="Country" />
+      <input name="linkedin"   placeholder="LinkedIn URL" />
+      <input name="website"    placeholder="Website" />
+      <input name="phone"      placeholder="Phone" />
+      <input name="email"      placeholder="Email" />
+      <input name="maintech"   placeholder="Main Technology" />
+      <input name="frameworks" placeholder="Frameworks" />
+      <input name="experience" placeholder="Total Years Experience" />
       <button type="submit">Save candidate</button>
     </form>
   </div>
-
-  <!-- nada de <script> inline – todo está en sidebar.js -->
   <script src="sidebar.js"></script>
 </body>
 </html>

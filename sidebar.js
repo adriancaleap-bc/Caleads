@@ -1,29 +1,21 @@
-/* --------- logo --------- */
-caleadsLogo.src = chrome.runtime.getURL('icon.png');
-
-/* --------- evitar Ctrl+V bloqueado --------- */
-document.querySelectorAll('#leadForm input')
-  .forEach(i => i.addEventListener('keydown', e => e.stopPropagation()));
-
-const leadForm = document.getElementById('leadForm');
-
-leadForm.addEventListener('submit', e => {
+const form = document.getElementById('leadForm');
+form.addEventListener('submit', function(e) {
   e.preventDefault();
-
-  const btn  = leadForm.querySelector('button');
-  const data = Object.fromEntries(new FormData(leadForm).entries());
-
-  btn.disabled = true; btn.textContent = 'Saving…';
-
-  chrome.runtime.sendMessage(
-    { type: 'saveLead', payload: data },
-    res => {
-      const ok = res && res.ok;
-      btn.classList.add(ok ? 'ok' : 'error');
-      btn.textContent = ok ? 'Saved' : 'Error';
-      if (ok) leadForm.reset();
-
-      setTimeout(() => { btn.disabled=false; btn.className=''; btn.textContent='Save candidate'; }, 2000);
+  const data = Object.fromEntries(new FormData(form).entries());
+  chrome.runtime.sendMessage({ type: 'saveLead', payload: data }, function(response) {
+    const btn = form.querySelector('button[type="submit"]');
+    const originalText = btn.textContent;
+    if (response && response.ok) {
+      btn.textContent = 'Candidate saved';
+      btn.style.background = '#28a745';
+      form.reset();
+    } else {
+      btn.textContent = 'Error';
+      btn.style.background = '#dc3545';
     }
-  );
+    setTimeout(() => {
+      btn.textContent = originalText;
+      btn.style.background = '#007bff';
+    }, 1800);
+  });
 });
