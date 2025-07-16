@@ -52,7 +52,7 @@
           .forEach(i => i.addEventListener('keydown', e => e.stopPropagation()));
 
   const SHEET_URL =
-    'https://script.google.com/macros/s/AKfycbxh_3ULEHiXisqeC3wxbLAzntw-KEJsXelxsAS8UHmAH2yKPl_4I0_JW3Xyhc2jI680HA/exec';
+    'https://script.google.com/macros/s/AKfycbxWepNkArQ_1jUx5eXnqTT6_-mShA_w3cSn_OFXZIG4Tm2MBajF1P2izBazdrY5dzGy9g/exec'; // Nueva URL
 
   const form      = document.getElementById('leadForm');
   const btn       = form.querySelector('button[type="submit"]');
@@ -60,36 +60,36 @@
   const baseColor = '#007bff';
 
   btn.addEventListener('click', async e => {
-  e.preventDefault();
-  const data = Object.fromEntries(new FormData(form).entries());
-  
-  btn.disabled = true;
-  const txtOrig = btn.textContent;
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form).entries());
+    
+    btn.disabled = true;
+    const txtOrig = btn.textContent;
 
-  try {
-    const res = await fetch(SHEET_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
+    try {
+      const res = await fetch(SHEET_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
 
-    if (res.ok) {
-      btn.textContent = 'Candidate saved';
-      btn.style.background = okColor;
-      form.reset();
-    } else {
+      if (res.ok) {
+        btn.textContent = 'Candidate saved';
+        btn.style.background = okColor;
+        form.reset();
+      } else {
+        btn.textContent = 'Error';
+        btn.style.background = '#dc3545';
+      }
+    } catch {
       btn.textContent = 'Error';
       btn.style.background = '#dc3545';
     }
-  } catch {
-    btn.textContent = 'Error';
-    btn.style.background = '#dc3545';
-  }
 
-  setTimeout(() => {
-    btn.disabled = false;
-    btn.textContent = txtOrig;
-    btn.style.background = baseColor;
-  }, 2000);
-});
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = txtOrig;
+      btn.style.background = baseColor;
+    }, 2000);
+  });
 </script>
